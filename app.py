@@ -72,7 +72,7 @@ if user_input:
         with st.chat_message("assistant"):
             with st.spinner("Thinking....."):
                 response=client.models.generate_content(
-                    model='gemini-3.5-flash-lite',
+                    model='gemini-3.8-flash',
                     contents=user_text,
                     )
                 st.markdown(response.text)
