@@ -15,9 +15,9 @@ def process_docx(file):
     pass
 
 client=OpenAI(
-              api_key=st.secrets["GROQ_API_KEY"],
-              base_url="https://api.groq.com/openai/v1"
-             )
+            api_key=st.secrets["GROQ_API_KEY"],
+            base_url="https://api.groq.com/openai/v1"
+            )
 # for model in client.models.list():
 #      print(f"Model ID: {model.name} -> Display: {model.display_name}")
 
@@ -98,24 +98,33 @@ if user_input:
             response_placeholder=st.empty()
             try:
                 with st.spinner("Thinking....."):
-                    response=client.chat.completions.create(
-                        model="openai/gpt-oss-safeguard-20b",
-                        messages=[{
-                            "role":"system",
-                            "content":("You are a helpful and factual AI assistant that answers questions in the shortest possible manner. "
-                            "Provide accurate names, dates, and facts. "
-                            "Never invent information or use placeholders "
-                            "Use web search to verify factual information. "
-                            "If something cannot be verified, say so."
-                            )
-                            },
-                            {
-                            "role": "user", "content": user_text
-                            }],
-                          tools=[{"type": "browser_search"}],
-                          tool_choice="auto",
-                          stream=False
+                    api_messages=[
+                        {
+                        "role":"system",
+                        "content":(
+                        "You are a helpful and factual AI assistant. "
+                        "Answer questions concisely but always use complete sentences. "
+                        "Never give incomplete answers or stop midway through a sentence. "
+                        "Always consider previous conversation messages when answering follow-up questions. "
+                        "Resolve references such as him, her, that and before him using conversation context. "
+                        "Provide accurate names, dates and facts. "
+                        "Never invent information. "
+                        "If you are unsure, clearly say so."
                         )
+                        }]
+                    for msg in st.session_state.messages:
+                        api_messages.append({
+                            "role":msg["role"],
+                            "content":msg["content"]
+                        })
+                        
+                    response = client.chat.completions.create(
+                        model="qwen/qwen3.8-27b",
+                        messages=api_messages,
+                        stream=False
+                        )
+                        #   tools=[{"type": "browser_search"}],
+                        #   tool_choice="auto",
                     # for chunk in response_stream:
                     #     if chunk.choices[0].delta.content:
                     #         full_response+=chunk.choices[0].delta.content
