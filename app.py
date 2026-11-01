@@ -1,9 +1,17 @@
 import streamlit as st
-from google import genai
+from openai import OpenAI
 
-client=genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+# This is page title visible in the browser tab #
+st.set_page_config(
+    page_title="My Doc Info Extractor"
+) 
+
+client=OpenAI(
+              api_key=st.secrets["GROQ_API_KEY"],
+              base_url="https://api.groq.com/openai/v1"
+             )
 # for model in client.models.list():
-#     print(f"Model ID: {model.name} -> Display: {model.display_name}")
+#      print(f"Model ID: {model.name} -> Display: {model.display_name}")
 
 # Inject CSS to flip user message alignment
 st.markdown("""
@@ -36,11 +44,6 @@ div[data-testid="stChatInput"]:has(textarea[placeholder]:placeholder-shown)::aft
 </style>
 """, unsafe_allow_html=True)
 
-# This is page title visible in the browser tab #
-st.set_page_config(
-    page_title="My Doc Info Extractor"
-) 
-
 # This is the title part of the page which is in the main screen #
 with st.container():
     st.title("Welcome to My Doc Info Extractor")
@@ -70,14 +73,39 @@ if user_input:
                 for file in user_files:
                     st.markdown(f"Uploaded file: {file.name}")
         with st.chat_message("assistant"):
-            with st.spinner("Thinking....."):
-                response=client.models.generate_content(
-                    model='gemini-3.8-flash',
-                    contents=user_text,
-                    )
-                st.markdown(response.text)
-        st.session_state.messages.append({"role": "assistant", "content": response.text})
-
+            full_response = ""
+            response_placeholder=st.empty()
+            try:
+                with st.spinner("Thinking....."):
+                    response=client.chat.completions.create(
+                        model="openai/gpt-oss-20b",
+                        messages=[{
+                            "role":"system",
+                            "content":("You are a helpful and factual AI assistant that asnswers questions in the shortest possible manner. "
+                            "Provide accurate names, dates, and facts. "
+                            "Never invent information or use placeholders "
+                            "Use web search to verify factual information. "
+                            "If something cannot be verified, say so."
+                            )
+                            },
+                            {
+                            "role": "user", "content": user_text
+                            }],
+                          tools=[{"type": "browser_search"}],
+                          tool_choice="auto",
+                          stream=False
+                        )
+                    # for chunk in response_stream:
+                    #     if chunk.choices[0].delta.content:
+                    #         full_response+=chunk.choices[0].delta.content
+                    #         response_placeholder.markdown(full_response+" ")
+                    full_response = response.choices[0].message.content or ""
+                    response_placeholder.markdown(full_response)
+                #st.markdown(response.text)
+            except Exception as e:
+                #st.error("An error occurred. Please try again later.", icon="🚨")
+                st.exception(e)
+        st.session_state.messages.append({"role": "assistant", "content": full_response})
 # This is the bottom part  - the FOOTER #
 with st.bottom:
     st.markdown("""<div style='text-align: center;'>Copyright © 2026 My Doc Info Extractor 
