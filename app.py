@@ -6,6 +6,14 @@ st.set_page_config(
     page_title="My Doc Info Extractor"
 ) 
 
+def process_pdf(file):
+    print("Processing PDF file:")
+    pass
+
+def process_docx(file):
+    print("Processing DOCX file:")
+    pass
+
 client=OpenAI(
               api_key=st.secrets["GROQ_API_KEY"],
               base_url="https://api.groq.com/openai/v1"
@@ -52,6 +60,7 @@ div[data-testid="stChatInput"]:has(textarea[placeholder]:placeholder-shown)::aft
     pointer-events: none; /* Allows clicks to pass through to the box behind it */
 }
 
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -70,6 +79,7 @@ with st.container():
             st.markdown(message["content"])
             
 user_input=st.chat_input(placeholder="Type a message... ", accept_file=True) 
+
 if user_input:
 # Handle the text part of the input
     user_text = user_input.text
@@ -89,10 +99,10 @@ if user_input:
             try:
                 with st.spinner("Thinking....."):
                     response=client.chat.completions.create(
-                        model="openai/gpt-oss-20b",
+                        model="openai/gpt-oss-safeguard-20b",
                         messages=[{
                             "role":"system",
-                            "content":("You are a helpful and factual AI assistant that asnswers questions in the shortest possible manner. "
+                            "content":("You are a helpful and factual AI assistant that answers questions in the shortest possible manner. "
                             "Provide accurate names, dates, and facts. "
                             "Never invent information or use placeholders "
                             "Use web search to verify factual information. "
@@ -117,6 +127,8 @@ if user_input:
                 #st.error("An error occurred. Please try again later.", icon="🚨")
                 st.exception(e)
         st.session_state.messages.append({"role": "assistant", "content": full_response})
+
+        
 # This is the bottom part  - the FOOTER #
 with st.bottom:
     st.markdown("""<div style='text-align: center;'>Copyright © 2026 My Doc Info Extractor 
