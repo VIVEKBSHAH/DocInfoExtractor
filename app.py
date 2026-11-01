@@ -17,18 +17,29 @@ client=OpenAI(
 st.markdown("""
 <style>
 /* Target the user message container and reverse row layout */
+
 div[data-testid="stChatMessage"]:has(div[aria-label="Chat message from user"]) {
     flex-direction: row-reverse;
     text-align: right;
     margin-left: auto;
     width: fit-content;
     max-width: 80%;
-    border: 2px solid #e0e0e0;       /* Adds a slight, clean light-gray border */
-    border-radius: 10px;              /* Rounds the sharp corners of the border */
-    padding: 8px 10px;              /* Gives breathing room between the text and the border */
-    background-color: #D3D3D3;
+
+    border: 2px solid var(--st-secondary-background-color);
+    border-radius: 10px;
+    padding: 8px 10px;
+
+    background-color: var(--st-secondary-background-color);
+    color: var(--st-text-color);
+
     white-space: pre-wrap;
 }
+
+/* Apply theme-aware text color inside user messages */
+div[data-testid="stChatMessage"]:has(div[aria-label="Chat message from user"]) p {
+    color: var(--st-text-color);
+}
+
 /* Only show the note when the placeholder is actively visible */
 div[data-testid="stChatInput"]:has(textarea[placeholder]:placeholder-shown)::after {
     content: "Shift + Enter for new line";
