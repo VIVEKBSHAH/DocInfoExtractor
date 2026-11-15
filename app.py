@@ -121,7 +121,8 @@ if user_input:
                     response = client.chat.completions.create(
                         model="qwen/qwen3.8-27b",
                         messages=api_messages,
-                        stream=False
+                        stream=False,
+                        max_tokens=800
                         )
                         #   tools=[{"type": "browser_search"}],
                         #   tool_choice="auto",
